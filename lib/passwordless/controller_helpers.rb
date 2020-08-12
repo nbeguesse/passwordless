@@ -39,7 +39,7 @@ module Passwordless
 
       authenticate_by_session(authenticatable_class)
     end
-    deprecate :authenticate_by_cookie, deprecator: CookieDeprecation
+    #deprecate :authenticate_by_cookie, deprecator: CookieDeprecation
 
     def upgrade_passwordless_cookie(authenticatable_class)
       key = cookie_name(authenticatable_class)
@@ -89,6 +89,11 @@ module Passwordless
 
       key = session_key(passwordless_session.authenticatable_type)
       session[key] = passwordless_session.id
+
+      ### i.e. PASSWORDLESS COOKIE SIGN IN PATCH
+      key = cookie_name(passwordless_session.authenticatable_type.constantize)
+      cookies.encrypted[key] = { value: passwordless_session.authenticatable_id, expires: Passwordless.expires_at.yield }
+      ### END PATCH
 
       if record.is_a?(Passwordless::Session)
         passwordless_session
